@@ -4,6 +4,8 @@
 let carState = {
   x: 0,
   y: 0,
+  angle: 20,
+  speed: 1,
   isMoving: false,
 }
 
@@ -30,12 +32,22 @@ window.onresize = () => {
 // Logic Function
 function drawView() {
   context.clearRect(0, 0, canvas.width, canvas.height);
+  context.save();
   
+  context.rotate(carState.angle * Math.PI/180);
+  context.translate(carImage.x,carImage.y);
+
   if (carImage.complete) {
-    context.drawImage(carImage, carState.x, carState.y);
+    drawCar();
   } else {
-    carImage.onload = () => context.drawImage(carImage, carState.x, carState.y);
+    carImage.onload = drawCar;
   }
+
+  context.restore();
+}
+
+function drawCar() {
+  context.drawImage(carImage, carState.x, carState.y);
 }
 
 function moveCar({ pageX, pageY }) {
@@ -48,15 +60,15 @@ function moveCar({ pageX, pageY }) {
     }
 
     if (carState.x > pageX) {
-      changeCarState({ x: carState.x - 1 });
+      changeCarState({ x: carState.x + carState.speed * Math.cos(Math.PI/180 * carState.angle) });
     } else if (carState.x < pageX) {
-      changeCarState({ x: carState.x + 1 });
+      changeCarState({ x: carState.x - carState.speed * Math.cos(Math.PI/180 * carState.angle) });
     }
 
     if (carState.y > pageY) {
-      changeCarState({ y: carState.y - 1 });
+      changeCarState({ y: carState.y + carState.speed * Math.sin(Math.PI/180 * carState.angle) });
     } else if (carState.y < pageY) {
-      changeCarState({ y: carState.y + 1 });
+      changeCarState({ y: carState.y - carState.speed * Math.sin(Math.PI/180 * carState.angle) });
     }
   }
 }
