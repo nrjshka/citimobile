@@ -69,7 +69,6 @@ function moveCar({ pageX, pageY }) {
       duration: 50000,
       timing: [makeEaseInOut(quad), makeEaseInOut(bounce)],
       draw: (pr1, pr2) => {
-        debugger;
         const [dy, dx] = [carState.y + (pageY - carState.y) * pr1 - carState.y, carState.x + (pageX - carState.x) * pr2 - carState.x];
         let theta = Math.atan(dy/dx)
 
