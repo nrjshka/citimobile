@@ -7,7 +7,6 @@ let carState = {
   w: 80,
   h: 40,
   angle: 0,
-  speed: 1,
   isMoving: false,
   getCurrentAngle: function() {
     return this.angle * Math.PI/180;
@@ -56,22 +55,37 @@ function drawCar() {
 }
 
 function moveCar({ pageX, pageY }) {
-  return function moveAnimation() {
-    if (pageX !== carState.x || pageY !== carState.y) {
+  return function amation() {
+    if (!carState.isMoving || (
+      (pageX + 5 > carState.x && pageX - 5 < carState.x) && (pageY + 5 > carState.y && pageY - 5 < carState.y)
+    ) ) {
+      changeCarState({ isMoving: false, x: pageX, y: pageY });
+    } else {
       drawView();
       requestAnimationFrame(moveCar({ pageX, pageY }));
-    } else {
-      changeCarState({ isMoving: false });
     }
 
-    if (carState.x > pageX || carState.x < pageX) {
-      changeCarState({ x: carState.x + carState.speed * Math.cos(carState.getCurrentAngle()) });
-    }
+    animate({
+      duration: 50000,
+      timing: [makeEaseInOut(quad), makeEaseInOut(bounce)],
+      draw: (pr1, pr2) => {
+        debugger;
+        const [dy, dx] = [carState.y + (pageY - carState.y) * pr1 - carState.y, carState.x + (pageX - carState.x) * pr2 - carState.x];
+        let theta = Math.atan(dy/dx)
 
-    if (carState.y > pageY || carState.y < pageY) {
-      debugger;
-      changeCarState({ y: carState.y - carState.speed * Math.sin(carState.getCurrentAngle()) });
-    }
+        theta *= 180/Math.PI;
+
+        if (dx < 0) {
+          theta += 180;
+        }
+
+        changeCarState({
+          y: carState.y + (pageY - carState.y) * pr1,
+          x: carState.x + (pageX - carState.x) * pr2,
+          angle: theta,
+        });
+      }
+    });
   }
 }
 
@@ -89,4 +103,45 @@ function changeCarState(newState) {
     ...carState,
     ...newState
   };
+}
+
+// helper func
+
+function bounce(timeFraction) {
+  for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
+    if (timeFraction >= (7 - 4 * a) / 11) {
+      return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2)
+    }
+  }
+}
+
+function quad(progress) {
+  return Math.pow(progress, 2)
+}
+
+function makeEaseInOut(timing) {
+  return function(timeFraction) {
+    if (timeFraction < .5)
+      return timing(2 * timeFraction) / 2;
+    else
+      return (2 - timing(2 * (1 - timeFraction))) / 2;
+  }
+}
+
+function animate(options) {
+
+  var start = performance.now();
+
+  requestAnimationFrame(function animate(time) {
+    if (carState.isMoving) {
+      var timeFraction = (time - start) / options.duration;
+      if (timeFraction > 1) timeFraction = 1;
+
+      options.draw(...options.timing.map(func => func(timeFraction)));
+
+      if (timeFraction < 1) {
+        requestAnimationFrame(animate);
+      }
+    }
+  });
 }
