@@ -2,8 +2,8 @@
 
 // Initialization
 let carState = {
-  x: 150,
-  y: 150,
+  x: 40,
+  y: 20,
   w: 80,
   h: 40,
   angle: 0,
