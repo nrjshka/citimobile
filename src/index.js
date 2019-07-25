@@ -56,9 +56,7 @@ function drawCar() {
 
 function moveCar({ pageX, pageY }) {
   return function amation() {
-    if (!carState.isMoving || (
-      (pageX + 5 > carState.x && pageX - 5 < carState.x) && (pageY + 5 > carState.y && pageY - 5 < carState.y)
-    ) ) {
+    if (!carState.isMoving || pageX + 5 > carState.x && pageX - 5 < carState.x && pageY + 5 > carState.y && pageY - 5 < carState.y) {
       changeCarState({ isMoving: false, x: pageX, y: pageY });
     } else {
       drawView();
